@@ -11,5 +11,5 @@ export default {
 	locale: 'en-EN',
 	theme: 'system', // system, dark or light
 	email: 'm@schats.ru',
-	ymId: 97110177,
+	ymId: 97110177
 };
