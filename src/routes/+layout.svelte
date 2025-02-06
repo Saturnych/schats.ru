@@ -1,6 +1,9 @@
 <script lang="ts">
-	import Header from './Header.svelte';
+	import { DEBUG } from '$lib/vars/client';
+	import Header from '$lib/components/Header.svelte';
 	import '../app.css';
+
+	if (DEBUG) console.log('layout');
 
 	let { children } = $props();
 </script>

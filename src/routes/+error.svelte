@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { DEBUG } from '$lib/vars/client';
+
+	if (DEBUG) console.error('error:', $page.error);
 </script>
 
 <div class="page-error tile">
