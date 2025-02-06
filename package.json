@@ -1,30 +1,56 @@
 {
-  "name": "schats.ru",
-  "private": false,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.19.0",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "@vitejs/plugin-react-swc": "^3.5.0",
-    "eslint": "^9.19.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.18",
-    "globals": "^15.14.0",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.22.0",
-    "vite": "^6.1.0"
-  },
-  "dependencies": {
-    "@telegram-apps/sdk": "^3.3.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  }
+	"name": "schats.ru",
+	"version": "0.0.1",
+	"type": "module",
+	"license": "MIT",
+	"homepage": "https://schats.ru/",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Saturnych/schats.ru"
+	},
+	"bugs": {
+		"url": "https://github.com/Saturnych/schats.ru/issues"
+	},
+	"author": {
+		"name": "Denis Glebko",
+		"email": "saturnych@gmail.com",
+		"url": "https://github.com/Saturnych"
+	},
+	"scripts": {
+		"dev": "vite dev --port 3300 --host",
+		"start": "vite dev --host",
+		"build": "vite build",
+		"preview": "vite preview --port 3311 --host",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@fontsource/fira-mono": "^5.0.0",
+		"@neoconfetti/svelte": "^2.0.0",
+		"@sveltejs/adapter-auto": "^4.0.0",
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/adapter-vercel": "^5.6.1",
+		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"svelte": "^5.13.0",
+		"svelte-check": "^4.0.4",
+		"typescript": "^5.6.2",
+		"vite": "^6.0.0"
+	},
+	"dependencies": {
+		"axios": "^1.7.9"
+	},
+	"peerDependencies": {
+		"svelte": "^5.13.0"
+	},
+	"engines": {
+		"node": ">=20.11.0"
+	},
+	"keywords": [
+		"svelte",
+		"sveltekit",
+		"typescript",
+		"tailwindcss"
+	]
 }
