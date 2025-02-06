@@ -1,7 +1,10 @@
 <script lang="ts">
-	import Counter from './Counter.svelte';
+	import { DEBUG } from '$lib/vars/client';
+	import Counter from '$lib/components/Counter.svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcomeFallback from '$lib/images/svelte-welcome.png';
+
+	if (DEBUG) console.log('page');
 </script>
 
 <svelte:head>

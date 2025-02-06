@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { getCookie, setCookie, deleteCookie } from '$lib/cookie';
+import { uuid } from '$lib/utils';
 
 const storage: Record<string, any> = { getValue: get };
 
@@ -9,7 +10,7 @@ const defaults: Record<string, string> = {
 	refreshToken: '',
 	accessToken: '',
 	user: null,
-	uid: ''
+	uid: uuid()
 };
 
 Object.keys(defaults)

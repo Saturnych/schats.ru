@@ -1,6 +1,6 @@
-import short from 'short-uuid';
 import type { RequestHandler, Response } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
+import short from 'short-uuid';
 import consts from '$lib/vars/consts';
 
 export const uuid = () => short.uuid();

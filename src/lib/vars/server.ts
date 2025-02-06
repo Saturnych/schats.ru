@@ -1,6 +1,5 @@
-import { env as dynamic_private } from '$env/dynamic/private';
-
-const ENV = Object.assign(dynamic_private, import.meta.env);
+import { env } from '$env/dynamic/private';
+const ENV = Object.assign(env, import.meta.env);
 
 // SMTP
 export const SMTP_PORT = Number(ENV.SMTP_PORT || 465);
