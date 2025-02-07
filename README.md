@@ -1,4 +1,4 @@
-# schats.ru
+# schats
 
 ## Telegram grammY bot & SvelteKit webapp
 
