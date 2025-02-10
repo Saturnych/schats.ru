@@ -12,7 +12,7 @@ export const APP_NAME: string = ENV.PUBLIC_APP_NAME ?? 'App';
 export const SESSION_TTL = Number(ENV.PUBLIC_SESSION_TTL ?? 24 * 3600 * 1000); // day in ms
 export const TOKEN_EXPIRES = ENV.PUBLIC_TOKEN_EXPIRES ?? '180m';
 export const TOKEN_EXPIRES_SEC = Number(ENV.PUBLIC_TOKEN_EXPIRES_SEC ?? 10800);
-export const SUPABASE_URL: string = ENV.PUBLIC_SUPABASE_URL ?? '';
-export const SUPABASE_ANON_KEY: string = ENV.PUBLIC_SUPABASE_ANON_KEY ?? '';
+export const SUPABASE_URL: string = ENV.PUBLIC_SB_URL ?? '';
+export const SUPABASE_ANON_KEY: string = ENV.PUBLIC_SB_ANON_KEY ?? '';
 
 if (DEBUG) console.log('APP_NAME:', APP_NAME);
