@@ -9,17 +9,16 @@
 	const url = new URL($page.url);
 	if (DEBUG) console.log('webapp uri:', url.pathname+url.search);
 
-	let initData: object = $state(imported.initData);
+	let initData: object = $state(imported?.initData);
 	let initDataUnsafe: object = $derived(initData ? Object.assign({}, initData) : {});
 
-	if (DEBUG) console.log('initData:', initData);
-	if (DEBUG) console.log('initDataUnsafe:', initDataUnsafe);
+	if (DEBUG) console.log('initData:', $inspect(initData));
+	if (DEBUG) console.log('initDataUnsafe:', $inspect(initDataUnsafe));
 
 	$effect(() => {
 		if (!browser) return;
 
 		const mode = url.searchParams.get('mode') || '';
-		if (DEBUG) console.log('webapp mode:', mode);
 		if (mode !== 'app') return;
 
 		const WebApp = window.Telegram.WebApp;
