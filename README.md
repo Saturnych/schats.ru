@@ -1,1 +1,7 @@
-# schats.ru
+# schats
+
+# build:
+
+yarn
+
+yarn build

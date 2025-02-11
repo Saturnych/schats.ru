@@ -12,25 +12,78 @@ import type {
 	Response
 } from '@sveltejs/kit';
 
-export type ID = number | string;
-export type ISODate = Date | string;
-export type Email = string;
-export type Token = string;
-export type UserRole = 'USER' | 'ADMIN' | 'SUPER' | null;
-export type UUID = string | short.UUID;
-
 export type Event = LoadEvent | ServerLoadEvent;
 export type Layout = LayoutLoad | LayoutServerLoad;
 export type Data = LayoutData | LayoutServerData;
 export type Page = PageLoad | PageServerLoad;
 
+export type ID = number | string;
+export type ISODate = Date | string;
+export type Email = string;
+export type Token = string;
+export type ISODate = string; // '2021-10-29T21:52:35.830Z'
+export type Timestamp = number | string; // 1683628086
+export type Date = Date | ISODate | Timestamp | null;
+export type UUID = string | short.UUID;
+
+export enum Lang {
+  RU = 'ru',
+  EN = 'en',
+};
+
+export enum LangCode {
+  RU = 'ru-RU',
+  EN = 'en-US',
+};
+
+export enum UserRole {
+  USER = 'USER',
+	BOT = 'BOT',
+  ADMIN = 'ADMIN',
+	SUPER = 'SUPER',
+};
+
 export type UserToken = {
 	id: ID;
 	role: UserRole;
-	email: Email;
+	email?: Email;
 	iat?: number;
 	exp?: number;
 };
+
+export interface SessionData {
+  id: number;
+  uid?: UUID;
+  type?: string;
+  query_id?: string;
+  auth_date?: Date;
+  hash?: string;
+  country?: Country;
+	language_code?: Lang;
+  lang?: Lang;
+	first_name?: string;
+  last_name?: string;
+	username?: string;
+	page?: number;
+	expiry_date?: Date;
+	error?: string | number;
+};
+
+export type Session = SessionData | null;
+
+export interface BotSessionData {
+	id: number;
+	session: Session;
+	created_at: Date;
+};
+
+export type BotSession = BotSessionData | undefined;
+
+export interface AuthCallbacks {
+	signIn?: () => boolean | Promise<boolean>;
+	session?: (session: Session) => Session | Promise<Session>;
+	redirect?: (url: string) => string | Promise<string>;
+}
 
 export interface ITelegramUser {
 	id: number;

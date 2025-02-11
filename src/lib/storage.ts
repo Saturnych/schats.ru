@@ -5,12 +5,11 @@ import { uuid } from '$lib/utils';
 
 const storage: Record<string, any> = { getValue: get };
 
-const defaults: Record<string, string> = {
-	expires: '',
-	refreshToken: '',
-	accessToken: '',
+const defaults: Record<string, any> = {
+	expires: null,
+	botSession: null,
 	user: null,
-	uid: uuid()
+	uid: uuid(),
 };
 
 Object.keys(defaults)

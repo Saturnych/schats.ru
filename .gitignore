@@ -1,5 +1,7 @@
-.data
 node_modules
+.data
+.data.*
+env.json
 
 # Output
 .output

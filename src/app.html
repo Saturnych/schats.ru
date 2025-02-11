@@ -6,13 +6,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		%sveltekit.head%
 		<script src="https://telegram.org/js/telegram-web-app.js"></script>
-		<script>
-			if (Telegram?.WebApp) {
-				Telegram.WebApp.expand();
-				console.log('Telegram.WebApp started:');
-				//console.log(Telegram.WebApp);
-			}
-		</script>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
