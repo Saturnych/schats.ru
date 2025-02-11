@@ -3,14 +3,18 @@
 	import { browser } from '$app/environment';
 	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { importJson } from '$lib/utils';
-	import { DEBUG } from '$lib/vars/client';
+	import { checkWebAppSignature, importJson, postData } from '$lib/utils';
+	import { DEBUG, TELEGRAM_BOT_ID, TELEGRAM_BOT_KEY } from '$lib/vars/client';
 
 	const url = new URL($page.url);
 	if (DEBUG) console.log('webapp uri:', url.pathname+url.search);
 
-	let initData: object = $state({});
-	let initDataUnsafe: object = $derived(initData ? Object.assign({}, initData) : {});
+	let initDataUnsafe: object = $state({});
+	let initDataUnsafeDerived: object = $derived(initDataUnsafe ? Object.assign({}, initDataUnsafe) : {});
+	let initData: string = $state('');
+	let initDataDerived: string = $derived(initData ? initData : '');
+	let signatureChecked: boolean = $state(null);
+	let hashChecked: boolean = $state(null);
 
 	//setContext('initData', () => $state.snapshot(initData));
 	//if (DEBUG) console.log('getContext initData:', getContext('initData')());
@@ -21,13 +25,10 @@
 		const mode = url.searchParams.get('mode') || '';
 		if (mode !== 'app') return;
 
-		const imported = await importJson();
-		if (DEBUG) console.log('imported:', imported);
+		const { Utils, WebApp } = window.Telegram;
+		if (DEBUG) console.log('Utils:', Utils);
 
-		if (imported?.initData) initData = imported.initData
-		if (DEBUG) console.log('initData:', $state.snapshot(initData));
-
-		const WebApp = window.Telegram.WebApp;
+		//let initDataDecoded: string = $derived(initData ? Utils.urlSafeDecode(initData) : '');
 
 		WebApp.enableClosingConfirmation();
 		//WebApp.disableClosingConfirmation()
@@ -48,10 +49,27 @@
 		WebApp.expand();
 		WebApp.ready();
 
+		const imported = await importJson();
+		if (DEBUG) console.log('imported:', imported);
+
 		//const initData = (WebApp.initDataUnsafe?.user && WebApp.initDataUnsafe);
 		if (DEBUG) console.log('WebApp.initData:', WebApp.initData);
 		if (DEBUG) console.log('WebApp.initDataUnsafe:', WebApp.initDataUnsafe);
-		if (WebApp.initDataUnsafe?.user) initData = WebApp.initDataUnsafe;
+
+		if (initData) initData = WebApp.initData; else initData = imported.initData;
+		if (DEBUG) console.log('initDataDerived:', initDataDerived);
+
+		if (WebApp.initDataUnsafe?.user) initDataUnsafe = WebApp.initDataUnsafe; else initDataUnsafe = imported.initDataUnsafe;
+		if (DEBUG) console.log('initDataUnsafeDerived:', initDataUnsafeDerived);
+
+		if (initDataUnsafe?.signature) {
+			signatureChecked = await checkWebAppSignature(initData, TELEGRAM_BOT_ID, TELEGRAM_BOT_KEY, initDataUnsafe?.signature, console.log);
+			if (DEBUG) console.log('signatureChecked:', signatureChecked);
+			const post = await postData('/api/session', { initData });
+			if (DEBUG) console.log('hashChecked:', post?.data?.checked?.ok);
+			hashChecked = !!post?.data?.checked?.ok;
+		}
+
 	});
 
 	let { children } = $props();
@@ -65,8 +83,14 @@
 <div class="text-column">
 	<h1>WebApp</h1>
 
+	<p>
+		signatureChecked: {signatureChecked}
+	</p>
+	<p>
+		hashChecked: {hashChecked}
+	</p>
 	<pre>
-		{JSON.stringify(initDataUnsafe,null,2)}
+		{JSON.stringify(initDataUnsafeDerived,null,2)}
 	</pre>
 
 </div>

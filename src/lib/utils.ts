@@ -1,5 +1,6 @@
 import type { Response } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
+import { ed25519 } from '@noble/curves/ed25519';
 import { browser } from '$app/environment';
 import axios from 'axios';
 import crypto from 'crypto';
@@ -8,48 +9,84 @@ import consts from '$lib/vars/consts';
 
 const { subtle } = browser ? globalThis.crypto : crypto.webcrypto;
 
-export const generateSubtleKey = async (name = 'HMAC', hash = 'SHA-256') => subtle.generateKey({ name, hash }, true, ['sign', 'verify']);
+// Hex to Base64
+function hexToBase64(str) {
+    return btoa(String.fromCharCode.apply(null,
+      str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
+    );
+}
 
-export const createSubtleHash = async (text, key, name = 'HMAC') => {
-  const enc = new TextEncoder();
-  const message = enc.encode(text);
-  return await subtle.sign({ name }, key, message); // digest
+export const base64decode = (str: string): string => {
+  str = str
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+  const pad: number = str.length % 4;
+  if (pad>0) {
+    if (pad === 1) return null;
+    str += new Array(5-pad).join('=');
+  }
+  return str;
 };
 
-export const cryptoHash = (data, type = 'sha256', enc = 'hex') => crypto.createHash(type).update(data).digest(enc);
-
-export const cryptoHmac = (data, secret, enc = 'hex', type = 'sha256') => {
-  const hmac = crypto.createHmac(type, secret)
-  hmac.write(data);
-  hmac.end();
-  return !!enc ? hmac.read().toString(enc) : hmac.read();
+export const base64ToHex = (str: string, upperCase: boolean = true): string => {
+  const raw = atob(str);
+  let result: string = '';
+  for (let i = 0; i < raw.length; i++) {
+    const hex = raw.charCodeAt(i).toString(16);
+    result += (hex.length === 2 ? hex : '0' + hex);
+  }
+  return upperCase ? result.toUpperCase() : result;
 };
 
-export const cryptoHmacDigest = (data, secret, enc = 'hex', type = 'sha256') => {
-  const hmac = crypto.createHmac(type, String(secret)).update(String(data));
-  return !!enc ? hmac.digest(enc) : hmac.digest();
+export const createCheckString = (initData: string, removeList: string[] = ['hash'], prepend: string = ''): string => {
+  const ret: Record<string,string> = {};
+  // The data is a query string, which is composed of a series of field-value pairs.
+  const encoded: string = decodeURIComponent(initData);
+  // Data-check-string is a chain of all received fields'.
+  const arr: string[] = encoded.split('&');
+  if (removeList?.length>0) {
+    removeList.forEach(el=>{
+      const elIndex: number = arr.findIndex((str) => str.startsWith(el));
+      ret[el] = arr.splice(elIndex)[0].split('=')[1];
+    })
+  }
+  // Sorted alphabetically
+  arr.sort((a, b) => a.localeCompare(b));
+  // In the format key=<value> with a line feed character ('\n', 0x0A) used as separator
+  // e.g., 'auth_date=<auth_date>\nquery_id=<query_id>\nuser=<user>
+  ret['checkString'] = `${!!prepend ? prepend+"\n" : ''}${arr.join("\n")}`;
+  return ret;
 };
 
-export const checkWebAppData = async (initDataUnsafe: Record<string, any>, token: string, isAlert: boolean = false): Record<string, any> => {
-  const { hash, ...initData } = initDataUnsafe;
-  const log = isAlert ? alert : console.log;
-  const keys = Object.keys(initData).sort();
-  const check_string = keys.map(key => {
-    let ret = `${key}=`;
-    if (typeof initData[key] === 'object' && !Array.isArray(initData[key]) && initData[key] !== null) {
-      ret += JSON.stringify(initData[key]);
-    } else
-      ret += initData[key];
-    return ret;
-  }).join("\n");
-  let secret_key = cryptoHmacDigest(token, 'WebAppData', '');
-  //if (typeof secret_key === 'object' && 'data' in secret_key) secret_key = secret_key.data;
-  const hmac = cryptoHmac(check_string, secret_key);
-  const hmac_digest = cryptoHmacDigest(check_string, secret_key);
+export const checkWebAppSignature = async (initData: string, botId: string, publicKey: string, signature: string, log: any): Record<string, any> => {
+  log('initData:', initData);
+  const { hash, checkString } = createCheckString(initData, ['hash','signature'], `${botId}:WebAppData`);
+  log('checkString:', checkString);
+  const base64Signature: string = base64decode(signature);
+  log('base64Signature:', base64Signature);
+  log('hexedSignature:', base64ToHex(base64Signature));
+  const checked: boolean = ed25519.verify(base64ToHex(base64Signature), Uint8Array.from(checkString), publicKey); // Uint8Array.from(checkString)
+  log('checked:', checked);
+  return checked;
+};
+
+export const checkWebAppHash = (initData: string, token: string, log: any): boolean => {
+  // HMAC-SHA-256 signature of the bot's token with the constant string WebAppData used as a key.
+  const secret: Buffer = crypto.createHmac('sha256', 'WebAppData').update(token).digest();
+  // Data-check-string is a chain of all received fields
+  const { hash, checkString } = createCheckString(initData);
+  log('checkString:', checkString);
+  // The hexadecimal representation of the HMAC-SHA-256 signature of the data-check-string with the secret key
+  const hmac: string = crypto
+    .createHmac('sha256', secret)
+    .update(checkString)
+    .digest('hex');
+  // If hash is equal, the data may be used on your server.
+  // Complex data types are represented as JSON-serialized objects.
   return {
     ok: (hmac === hash),
+    hash,
     hmac,
-    hmac_digest,
   };
 };
 
