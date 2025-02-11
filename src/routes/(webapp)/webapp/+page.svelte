@@ -1,25 +1,28 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, setContext, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { importJson } from '$lib/utils';
 	import { DEBUG } from '$lib/vars/client';
-	import imported from '$lib/vars/imported';
 
 	const url = new URL($page.url);
 	if (DEBUG) console.log('webapp uri:', url.pathname+url.search);
 
-	let initData: object = $state(imported?.initData);
+	let initData: object = $state({});
 	let initDataUnsafe: object = $derived(initData ? Object.assign({}, initData) : {});
+	setContext('initDataUnsafe', () => initDataUnsafe);
+	if (DEBUG) console.log('getContext initDataUnsafe:', getContext('initDataUnsafe')());
 
-	if (DEBUG) console.log('initData:', $inspect(initData));
-	if (DEBUG) console.log('initDataUnsafe:', $inspect(initDataUnsafe));
-
-	$effect(() => {
+	$effect(async () => {
 		if (!browser) return;
 
 		const mode = url.searchParams.get('mode') || '';
 		if (mode !== 'app') return;
+
+		const imported = await importJson();
+		if (imported?.initData) initData = imported.initData
+		if (DEBUG) console.log('initData:', $state.snapshot(initData));
 
 		const WebApp = window.Telegram.WebApp;
 

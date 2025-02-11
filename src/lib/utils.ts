@@ -149,3 +149,14 @@ export const parseJson = (data: string, obj?: object): object => {
 	}
 	return obj;
 };
+
+export const importJson = async (env: object = {}) => {
+  const files = import.meta.glob('./*.json');
+  for (const file in files) {
+    try {
+      const res = await files[file]();
+      if ('default' in res) env = Object.assign(env, res.default);
+    } catch (e) {}
+  }
+  return env;
+}
