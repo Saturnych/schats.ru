@@ -11,8 +11,9 @@
 
 	let initData: object = $state({});
 	let initDataUnsafe: object = $derived(initData ? Object.assign({}, initData) : {});
-	setContext('initDataUnsafe', () => initDataUnsafe);
-	if (DEBUG) console.log('getContext initDataUnsafe:', getContext('initDataUnsafe')());
+
+	//setContext('initData', () => $state.snapshot(initData));
+	//if (DEBUG) console.log('getContext initData:', getContext('initData')());
 
 	$effect(async () => {
 		if (!browser) return;
@@ -21,6 +22,8 @@
 		if (mode !== 'app') return;
 
 		const imported = await importJson();
+		if (DEBUG) console.log('imported:', imported);
+
 		if (imported?.initData) initData = imported.initData
 		if (DEBUG) console.log('initData:', $state.snapshot(initData));
 
