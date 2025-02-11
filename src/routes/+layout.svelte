@@ -5,7 +5,7 @@
 
 	if (DEBUG) console.log('layout');
 
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
 <div class="app">
